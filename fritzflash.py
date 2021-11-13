@@ -138,7 +138,7 @@ def autodiscover_avm_ip():
             i += 1
         except OSError:
             i += 1
-            time.sleep(1)
+            time.sleep(0.1)
         except KeyboardInterrupt:
             print('\rAborting...\n')
             return None
