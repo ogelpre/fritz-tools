@@ -125,11 +125,12 @@ def autodiscover_avm_ip():
             raise e from None
     sender.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sender.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    sender.settimeout(1)
+    sender.settimeout(0.1)
 
     receiver = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     receiver.settimeout(AUTODISCOVER_TIMEOUT)
     receiver.bind(('192.168.178.2', 5035))
+    receiver.settimeout(0.1)
 
     i = 1
     while True:
