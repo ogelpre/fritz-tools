@@ -1,0 +1,48 @@
+---
+image: python:3.9-alpine
+
+.python_prepare:
+  variables:
+    PIP_CACHE_DIR: .pipenv/pipcache
+    PYLINTHOME: .pylint
+    WORKON_HOME: .pipenv/venvs
+    YAMLLINT: .gitlab-ci/yamllint.yml
+    FLAKE8: .gitlab-ci/flake8
+    PYLINTRC: .gitlab-ci/pylintrc
+  cache:
+    paths:
+      - .pipenv
+      - .pylint
+  before_script:
+    - export PATH="${HOME}/.local/bin:$PATH"
+    - echo $PATH
+    - pwd
+    - python3 -V
+    - python3 -m pip install --user pipenv
+    - pipenv clean
+
+stages:
+  - precheck
+
+linting:
+  extends: .python_prepare
+  stage: precheck
+  script:
+    - apk update
+    - apk add findutils
+    - pipenv sync --dev
+    - pipenv run python3 -m yamllint -c ${YAMLLINT} ${YAMLLINT}
+    - pipenv run python3 -m yamllint -c ${YAMLLINT} .gitlab-ci.yml
+    - pipenv run python3 -m flake8 --config=${FLAKE8} .
+    - pipenv run python3 -m pylint --rcfile=${PYLINTRC} $(find . -path ./.pipenv -prune -false -o -name "*.py")
+
+Pipfile.lock:
+  extends: .python_prepare
+  stage: precheck
+  script:
+    - apk update
+    - apk add jq
+    - pipenv sync --dev
+    - mv Pipfile.lock Pipfile.lock.original
+    - pipenv lock
+    - test $(jq "._meta.hash.sha256" Pipfile.lock) = $(jq "._meta.hash.sha256" Pipfile.lock.original)

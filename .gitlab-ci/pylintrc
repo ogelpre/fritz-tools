@@ -1,0 +1,9 @@
+[pylint]
+max-line-length=128
+min-public-methods=1
+
+[MESSAGES CONTROL]
+
+[SIMILARITIES]
+ignore-imports=yes
+min-similarity-lines=8
